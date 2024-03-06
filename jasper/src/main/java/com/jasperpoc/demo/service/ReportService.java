@@ -4,10 +4,12 @@ import com.jasperpoc.demo.Repository.DiseaseRepository;
 import com.jasperpoc.demo.entities.Disease;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.view.JasperViewer;
@@ -40,7 +42,9 @@ public class ReportService
 		parameters.put("videosLinks", disease.getVideosLinks());
 		parameters.put("createdBy", "Kleber Aluizio");
 
-		JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,parameters,new JREmptyDataSource());
+		JRDataSource dataSource = new JRBeanCollectionDataSource(Collections.singletonList(parameters));
+
+		JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,new HashMap<>(),dataSource);
 		if(reportFormat.equalsIgnoreCase("html")){
 			JasperExportManager.exportReportToHtmlFile(jasperPrint, path +"\\diasease.html");
 		}
