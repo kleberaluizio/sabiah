@@ -8,33 +8,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
-import org.springframework.beans.factory.annotation.Autowired;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 @Service
 public class ReportService
 {
-	@Autowired
-	private DiseaseRepository repository;
+	private static DiseaseRepository repository;
 
-	public String exportFile(String reportFormat) throws FileNotFoundException, JRException
+	public ReportService(DiseaseRepository repository){
+		this.repository = repository;
+	}
+
+	public static String exportFile(String reportFormat) throws FileNotFoundException, JRException
 	{
 		String path = "C:\\sabiah\\Report";
 		List<Disease> diseases = repository.findAll();
+		Disease disease = diseases.get(0);
 
 		File file = ResourceUtils.getFile("classpath:disease.jrxml");
-		JasperDesign jasperDesign;
 		JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-		JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(diseases);
 
 		Map<String, Object> parameters = new HashMap<>();
+
+		parameters.put("name", disease.getName());
+		parameters.put("description", disease.getDescription());
+		parameters.put("recommendations", disease.getRecommendations());
+		parameters.put("videosLinks", disease.getVideosLinks());
 		parameters.put("createdBy", "Kleber Aluizio");
 
-		JRDataSource dataSource1;
-		JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,parameters, dataSource);
+		JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,parameters,new JREmptyDataSource());
 		if(reportFormat.equalsIgnoreCase("html")){
 			JasperExportManager.exportReportToHtmlFile(jasperPrint, path +"\\diasease.html");
 		}
